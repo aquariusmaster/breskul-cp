@@ -6,6 +6,7 @@ import com.anderb.breskulcp.exception.ConnectionTimeoutException;
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Objects;
@@ -17,35 +18,24 @@ import java.util.logging.Logger;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class BreskulCPDataSource implements DataSource {
-    private final DataSource delegateDatasource;
     private final BlockingQueue<Connection> pool;
+    private final String jdbcUrl;
+    private final String driverClassName;
+    private final String username;
+    private final char[] passwordChars;
+    private final int poolSize;
     private final long connectionTimeout;
 
-    public BreskulCPDataSource(DataSource delegateDatasource) {
-        this(delegateDatasource, 10);
-    }
-
-    public BreskulCPDataSource(DataSource delegateDatasource, int poolSize) {
-        this(delegateDatasource, poolSize, 30_000);
-    }
-
-    public BreskulCPDataSource(DataSource delegateDatasource, int poolSize, long connectionTimeout) {
-        Objects.requireNonNull(delegateDatasource);
-        if (poolSize < 1) throw new IllegalArgumentException("Pool size cannot be less then 1");
-        this.delegateDatasource = delegateDatasource;
-        this.connectionTimeout = connectionTimeout;
+    public BreskulCPDataSource(DataSourceConfigs configs) {
+        Objects.requireNonNull(configs);
+        poolSize = configs.getPoolSize();
+        connectionTimeout = configs.getConnectionTimeout();
+        jdbcUrl = configs.getJdbcUrl();
+        driverClassName = configs.getDriverClassName();
+        username = configs.getUsername();
+        passwordChars = configs.getPassword().toCharArray();
         pool = new LinkedBlockingQueue<>(poolSize);
         fillPool(poolSize);
-    }
-
-    private void fillPool(int poolSize) {
-        try {
-            for (int i = 0; i < poolSize; i++) {
-                pool.add(new PooledConnection(delegateDatasource.getConnection(), this));
-            }
-        } catch (SQLException e) {
-            throw new ConnectionException();
-        }
     }
 
     @Override
@@ -66,40 +56,64 @@ public class BreskulCPDataSource implements DataSource {
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        return delegateDatasource.getLogWriter();
+        throw new UnsupportedOperationException("Operation is not supported yet");
+//        return delegateDatasource.getLogWriter();
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        delegateDatasource.setLogWriter(out);
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-        delegateDatasource.setLoginTimeout(seconds);
+//        delegateDatasource.setLogWriter(out);
+        throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        return delegateDatasource.getLoginTimeout();
+//        return delegateDatasource.getLoginTimeout();
+        throw new UnsupportedOperationException("Operation is not supported yet");
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+//        delegateDatasource.setLoginTimeout(seconds);
+        throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return delegateDatasource.getParentLogger();
+//        return delegateDatasource.getParentLogger();
+        throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return delegateDatasource.unwrap(iface);
+//        return delegateDatasource.unwrap(iface);
+        throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return delegateDatasource.isWrapperFor(iface);
+//        return delegateDatasource.isWrapperFor(iface);
+        throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
-    public Queue<Connection> getPool() {
+    protected Queue<Connection> getPool() {
         return pool;
     }
+
+    private void fillPool(int poolSize) {
+        for (int i = 0; i < poolSize; i++) {
+            pool.add(new PooledConnection(createConnection(), this));
+        }
+    }
+
+    private Connection createConnection() {
+        try {
+            Class.forName(driverClassName);
+            return DriverManager.getConnection(jdbcUrl, username, new String(passwordChars));
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new ConnectionException();
+        }
+    }
+
+
 }
