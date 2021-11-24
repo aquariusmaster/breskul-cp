@@ -44,7 +44,7 @@ public class BreskulCPDataSource extends BaseDataSource {
         }
     }
 
-    public void returnConnection(Connection connection) {
+    void returnConnection(Connection connection) {
         boolean isValid = validate(connection);
         if (isValid) {
             pool.add(connection);
