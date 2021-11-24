@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -45,8 +44,21 @@ public class BreskulCPDataSource extends BaseDataSource {
         }
     }
 
-    Queue<Connection> getPool() {
-        return pool;
+    public void returnConnection(Connection connection) {
+        boolean isValid = validate(connection);
+        if (isValid) {
+            pool.add(connection);
+        } else {
+            pool.add(createConnection());
+        }
+    }
+
+    private boolean validate(Connection connection) {
+        try {
+            return !connection.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     private void fillPool(int poolSize) {

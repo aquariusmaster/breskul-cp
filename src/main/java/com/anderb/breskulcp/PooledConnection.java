@@ -16,7 +16,7 @@ public class PooledConnection implements Connection {
 
     @Override
     public void close() throws SQLException {
-        dataSource.getPool().add(this);
+        dataSource.returnConnection(this);
     }
 
     @Override
