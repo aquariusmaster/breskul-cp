@@ -49,7 +49,7 @@ public class BreskulCPDataSource extends BaseDataSource {
         if (isValid) {
             pool.add(connection);
         } else {
-            pool.add(createConnection());
+            pool.add(createPooledConnection());
         }
     }
 
@@ -63,14 +63,15 @@ public class BreskulCPDataSource extends BaseDataSource {
 
     private void fillPool(int poolSize) {
         for (int i = 0; i < poolSize; i++) {
-            pool.add(new PooledConnection(createConnection(), this));
+            pool.add(createPooledConnection());
         }
     }
 
-    private Connection createConnection() {
+    private PooledConnection createPooledConnection() {
         try {
             Class.forName(driverClassName);
-            return DriverManager.getConnection(jdbcUrl, username, new String(passwordChars));
+            Connection physicalConnection = DriverManager.getConnection(jdbcUrl, username, new String(passwordChars));
+            return new PooledConnection(physicalConnection, this);
         } catch (ClassNotFoundException | SQLException e) {
             throw new ConnectionException();
         }
