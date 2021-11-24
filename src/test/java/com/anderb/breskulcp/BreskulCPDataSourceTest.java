@@ -20,8 +20,6 @@ class BreskulCPDataSourceTest {
                 .username("sa")
                 .password("sa")
                 .driverClassName("org.h2.Driver")
-                .poolSize(10)
-                .connectionTimeout(30_000)
                 .build();
     }
 

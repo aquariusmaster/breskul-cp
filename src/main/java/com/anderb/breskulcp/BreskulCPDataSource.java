@@ -39,7 +39,7 @@ public class BreskulCPDataSource implements DataSource {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         try {
             var connection = pool.poll(connectionTimeout, MILLISECONDS);
             if (connection == null) throw new ConnectionTimeoutException();
@@ -57,46 +57,39 @@ public class BreskulCPDataSource implements DataSource {
     @Override
     public PrintWriter getLogWriter() throws SQLException {
         throw new UnsupportedOperationException("Operation is not supported yet");
-//        return delegateDatasource.getLogWriter();
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-//        delegateDatasource.setLogWriter(out);
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-//        return delegateDatasource.getLoginTimeout();
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-//        delegateDatasource.setLoginTimeout(seconds);
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-//        return delegateDatasource.getParentLogger();
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-//        return delegateDatasource.unwrap(iface);
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-//        return delegateDatasource.isWrapperFor(iface);
         throw new UnsupportedOperationException("Operation is not supported yet");
     }
 
-    protected Queue<Connection> getPool() {
+    Queue<Connection> getPool() {
         return pool;
     }
 
